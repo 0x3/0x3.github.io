@@ -1,0 +1,48 @@
+<!DOCTYPE html><html><head><meta charset='utf-8'/><title>Fractal</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1,user-scalable=0"/>
+<style>*{margin:0;padding:0;border:0;overflow:hidden;width:100%;height:100%}</style></head>
+<body/><script>
+'use strict;'
+window.addEventListener("load", function() {
+	const canvas = document.createElement("canvas");
+	canvas.width = 1920, canvas.height = 1080;
+	const ctx = canvas.getContext('2d');
+	canvas.style.display = "block";
+	document.body.appendChild(canvas);
+	const rotation_angle = .06;
+	const branch_angle = Math.PI * .25;
+	const start_angle = .07;
+	const level_factor = .02;
+	const radius_factor = .38;
+	const space_factor = radius_factor ** 2 * .85;
+	const levels = 6;
+	const lines = [...Array(levels)].map(i => []);
+	function f(x, y, r, a, b, n){
+		const da = b < 0 ? -rotation_angle : rotation_angle;
+		for (let d = r; d > 0; a += da, b = -b) {
+			const dr = d * radius_factor;
+			if (dr < 1) return;
+			const ds = d * space_factor; d -= ds;
+			const i = ~~(n - Math.log2(ds * level_factor));
+			const l = lines[Math.min(Math.max(i, 0), levels - 1)];
+			l.push(x), l.push(y);
+			x += ds * Math.cos(a), y += ds * Math.sin(a);
+			l.push(x), l.push(y);
+			if (n < levels) f(x, y, dr, a + b, b, n + 1);
+		}
+	}
+	f(320, 400, 1500, start_angle, branch_angle, 0);
+	ctx.fillStyle = "#fff";
+	ctx.fillRect(0, 0, canvas.width, canvas.height);
+	for (let n = 0; n < levels; ++n) {
+		ctx.lineWidth = Math.max((levels - n) * .7, 1);
+		ctx.strokeStyle = "rgb(0," + n * 32 + ",0)";
+		const l = lines[n];
+		ctx.beginPath();
+		for (let i = 0; i < l.length; i += 4)
+			ctx.moveTo(l[i], l[i + 1]),
+			ctx.lineTo(l[i + 2], l[i + 3]);
+		ctx.stroke();
+	}
+});
+</script></html>
